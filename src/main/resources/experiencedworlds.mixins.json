@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.vicious.experiencedworlds.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "experiencedworlds.refmap.json",
+  "mixins": [
+    "MixinSyncableGlobalData"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

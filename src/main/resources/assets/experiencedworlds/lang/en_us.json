@@ -1,0 +1,5 @@
+{
+  "experiencedworlds.grewborder": "%1$s has made a stat reach %2$s, growing the border by a block.",
+  "experiencedworlds.grewborderplural": "%1$s has made a stat reach %2$s, growing the border by %3$s blocks.",
+  "experiencedworlds.advancementattained": "%1$s has made an advancement, increasing the border growth multiplier by %2$s. It is now %3$s"
+}
