@@ -1,5 +1,7 @@
 {
   "experiencedworlds.grewborder": "%1$s has made a stat reach %2$s, growing the border by a block.",
   "experiencedworlds.grewborderplural": "%1$s has made a stat reach %2$s, growing the border by %3$s blocks.",
-  "experiencedworlds.advancementattained": "%1$s has made an advancement, increasing the border growth multiplier by %2$s. It is now %3$s"
+  "experiencedworlds.advancementattained": "%1$s has made an advancement, increasing the border growth multiplier by %2$s. It is now %3$s",
+  "experiencedworlds.unfairworld": "The fairness check failed to find a fair spawn point within the configured time frame of: %2$s seconds. It is recommended to create a new world :(",
+  "experiencedworlds.fairworld": "This world is confirmed to have a fair starting spawn! Thanks for playing Experienced Worlds!"
 }

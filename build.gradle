@@ -80,7 +80,7 @@ minecraft {
 
 mixin {
     add sourceSets.main, "${mainpackage}.refmap.json"
-    add sourceSets.main, "serverstatistics.refmap.json"
+    //add sourceSets.main, "serverstatistics.refmap.json"
 
     config "${mainpackage}.mixins.json"
     config "serverstatistics.mixins.json"

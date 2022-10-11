@@ -7,6 +7,8 @@ import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
 import com.vicious.serverstatistics.common.event.StatChangedEvent;
 import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,10 +16,9 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -32,7 +33,6 @@ public class EWEventHandler {
         if(validStats.contains(type)){
             StatsCounter counter = ServerStatistics.getData().counter.getValue();
             int current = counter.getValue(stat);
-            //int base = EWCFG.getInstance().statRequirementBase.value();
             if (current > 0) {
                 int borderChange = (int)Math.log10(current + sce.getChange()) - (int)Math.log10(current);
                 if (borderChange != 0) {
@@ -41,15 +41,6 @@ public class EWEventHandler {
             } else {
                 increaseBorder(Math.max(1, (int) Math.log10(current + sce.getChange())), sce);
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onAdvancementEarned(AdvancedFirstTimeEvent afte){
-        if (EWCFG.getInstance().multipliersExponentialGain.getBoolean()) {
-            increaseMultiplier(Math.pow(1.0+EWCFG.getInstance().advancementMultiplierBase.value(), ServerStatistics.getData().advancers.size())-1.0, afte);
-        } else {
-            increaseMultiplier(EWCFG.getInstance().advancementMultiplierBase.value() * ServerStatistics.getData().advancers.size(), afte);
         }
     }
 
@@ -63,42 +54,22 @@ public class EWEventHandler {
     }
 
     @SubscribeEvent
-    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+    public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
-            relocate(sp);
-        }
-    }
-
-    private static void relocate(ServerPlayer plr){
-        ServerLevel level = plr.getLevel();
-        WorldBorder border = level.getWorldBorder();
-        if(!border.isWithinBounds(plr.position().x,plr.position().y,plr.position().z)){
-            int airCount = 0;
-            BlockPos start = new BlockPos(border.getCenterX(),255,border.getCenterZ());
-            BlockPos pos = new BlockPos(start);
-            while(pos.getY() > 63){
-                BlockState state = level.getBlockState(pos);
-                Material material = state.getMaterial();
-                if(!material.blocksMotion()){
-                    airCount++;
+            SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(ew)->{
+                if(ew.getExperiencedWorlds().fairnesslevel.getValue() > 1){
+                    Minecraft.getInstance().execute(()-> EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>",EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
                 }
-                else if(airCount > 1){
-                    break;
-                }
-                else{
-                    airCount = 0;
-                }
-            }
-            plr.setPos(pos.getX(),pos.getY()+1,pos.getZ());
+            });
         }
     }
 
 
-    private static void increaseMultiplier(double amount, AdvancedFirstTimeEvent afte){
+    @SubscribeEvent
+    public static void increaseMultiplier(AdvancedFirstTimeEvent afte){
         SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(VCGD)-> {
             SyncableWorldBorder swb = VCGD.getExperiencedWorlds();
-            swb.setSizeMultiplier(swb.getSizeMultiplier()+amount);
-            double a2 = Math.round(amount*100.0)/100.0;
+            double a2 = Math.round(swb.getCurrentMultiplierGain()*100.0)/100.0;
             EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
             growBorder(swb);
         });
@@ -108,7 +79,7 @@ public class EWEventHandler {
         SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(VCGD)->{
             SyncableWorldBorder swb = VCGD.getExperiencedWorlds();
             swb.expand(amount);
-            double a2 = Math.round(amount*(1+swb.getSizeMultiplier())*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
+            double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
             int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
             if(a2 != 1) {
                 EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
@@ -127,5 +98,38 @@ public class EWEventHandler {
             double size = border.getSize();
             border.lerpSizeBetween(size, newSize, (long)Math.ceil(newSize-size) * 1000L + border.getLerpRemainingTime());
         }
+    }
+
+    @SubscribeEvent
+    public static void onWorldInit(LevelEvent.CreateSpawnPosition event){
+        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(ew)->{
+            SyncableWorldBorder swb = ew.getExperiencedWorlds();
+            if(swb.fairnesslevel.getValue() == -1) {
+                Minecraft.getInstance().execute(() -> {
+                    if (event.getLevel() instanceof ServerLevel sl) {
+                        if (ServerHelper.server.overworld().equals(sl)) {
+                            WorldBorder border = sl.getWorldBorder();
+                            BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
+                            try {
+                                fairCenter = FairnessFixer.getFairPos((int) border.getCenterX(), (int) border.getCenterZ(), sl);
+                                border.setCenter(fairCenter.getX(), fairCenter.getZ());
+                                swb.fairnesslevel.setValue(1);
+                            } catch (FairnessFixer.UnfairnessException e) {
+                                swb.fairnesslevel.setValue(0);
+                            }
+                            for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
+                                if(swb.fairnesslevel.getValue() == 0){
+                                    EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
+                                }
+                                else{
+                                    EWChatMessage.from(ChatFormatting.GREEN,ChatFormatting.BOLD,"<experiencedworlds.fairworld>").send(player);
+                                }
+                                player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 }
