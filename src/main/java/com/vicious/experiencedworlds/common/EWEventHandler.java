@@ -1,11 +1,10 @@
 package com.vicious.experiencedworlds.common;
 
-import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
+import com.vicious.experiencedworlds.ExperiencedWorlds;
 import com.vicious.experiencedworlds.common.data.SyncableWorldBorder;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
 import com.vicious.serverstatistics.common.event.StatChangedEvent;
-import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -46,49 +45,41 @@ public class EWEventHandler {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event){
-        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class, (ew) -> {
-            for (ServerLevel l : event.getServer().getAllLevels()) {
-                l.getWorldBorder().setSize(ew.getExperiencedWorlds().getTransformedBorderSize());
-            }
-        });
+        for (ServerLevel l : event.getServer().getAllLevels()) {
+            l.getWorldBorder().setSize(ExperiencedWorlds.getBorder().getTransformedBorderSize());
+        }
     }
 
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
-            SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(ew)->{
-                if(ew.getExperiencedWorlds().fairnesslevel.getValue() > 1){
-                    Minecraft.getInstance().execute(()-> EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>",EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
-                }
-            });
+            if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1){
+                Minecraft.getInstance().execute(()-> EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>",EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
+            }
         }
     }
 
 
     @SubscribeEvent
     public static void increaseMultiplier(AdvancedFirstTimeEvent afte){
-        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(VCGD)-> {
-            SyncableWorldBorder swb = VCGD.getExperiencedWorlds();
-            double a2 = Math.round(swb.getCurrentMultiplierGain()*100.0)/100.0;
-            EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
-            growBorder(swb);
-        });
+        SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
+        double a2 = Math.round(swb.getCurrentMultiplierGain()*100.0)/100.0;
+        EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
+        growBorder(swb);
     }
 
     private static void increaseBorder(int amount, StatChangedEvent sce){
-        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(VCGD)->{
-            SyncableWorldBorder swb = VCGD.getExperiencedWorlds();
-            swb.expand(amount);
-            double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
-            int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
-            if(a2 != 1) {
-                EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
-            }
-            else{
-                EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
-            }
-            growBorder(swb);
-        });
+        SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
+        swb.expand(amount);
+        double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
+        int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
+        if(a2 != 1) {
+            EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
+        }
+        else{
+            EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
+        }
+        growBorder(swb);
     }
 
     private static void growBorder(SyncableWorldBorder swb){
@@ -102,34 +93,32 @@ public class EWEventHandler {
 
     @SubscribeEvent
     public static void onWorldInit(LevelEvent.CreateSpawnPosition event){
-        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(ew)->{
-            SyncableWorldBorder swb = ew.getExperiencedWorlds();
-            if(swb.fairnesslevel.getValue() == -1) {
-                Minecraft.getInstance().execute(() -> {
-                    if (event.getLevel() instanceof ServerLevel sl) {
-                        if (ServerHelper.server.overworld().equals(sl)) {
-                            WorldBorder border = sl.getWorldBorder();
-                            BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
-                            try {
-                                fairCenter = FairnessFixer.getFairPos((int) border.getCenterX(), (int) border.getCenterZ(), sl);
-                                border.setCenter(fairCenter.getX(), fairCenter.getZ());
-                                swb.fairnesslevel.setValue(1);
-                            } catch (FairnessFixer.UnfairnessException e) {
-                                swb.fairnesslevel.setValue(0);
+        SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
+        if(swb.fairnesslevel.getValue() == -1) {
+            Minecraft.getInstance().execute(() -> {
+                if (event.getLevel() instanceof ServerLevel sl) {
+                    if (ServerHelper.server.overworld().equals(sl)) {
+                        WorldBorder border = sl.getWorldBorder();
+                        BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
+                        try {
+                            fairCenter = FairnessFixer.getFairPos((int) border.getCenterX(), (int) border.getCenterZ(), sl);
+                            border.setCenter(fairCenter.getX(), fairCenter.getZ());
+                            swb.fairnesslevel.setValue(1);
+                        } catch (FairnessFixer.UnfairnessException e) {
+                            swb.fairnesslevel.setValue(0);
+                        }
+                        for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
+                            if(swb.fairnesslevel.getValue() == 0){
+                                EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
                             }
-                            for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
-                                if(swb.fairnesslevel.getValue() == 0){
-                                    EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
-                                }
-                                else{
-                                    EWChatMessage.from(ChatFormatting.GREEN,ChatFormatting.BOLD,"<experiencedworlds.fairworld>").send(player);
-                                }
-                                player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
+                            else{
+                                EWChatMessage.from(ChatFormatting.GREEN,ChatFormatting.BOLD,"<experiencedworlds.fairworld>").send(player);
                             }
+                            player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
                         }
                     }
-                });
-            }
-        });
-    }
+                }
+            });
+        }
+}
 }

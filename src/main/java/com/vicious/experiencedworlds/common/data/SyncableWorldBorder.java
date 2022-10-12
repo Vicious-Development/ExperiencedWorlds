@@ -1,6 +1,7 @@
 package com.vicious.experiencedworlds.common.data;
 
 import com.vicious.experiencedworlds.common.EWCFG;
+import com.vicious.experiencedworlds.common.EWMath;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.viciouscore.aunotamation.isyncablecompoundholder.annotation.Obscured;
 import com.vicious.viciouscore.common.data.structures.SyncableCompound;
@@ -18,7 +19,7 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     }
 
     @Override
-    public double getExpansions() {
+    public int getExpansions() {
         return expansions.getValue();
     }
 
@@ -35,19 +36,23 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     public double getSizeMultiplier() {
         int numAdvancements = ServerStatistics.getData().advancers.size();
         double mb = getMultiplierBase();
-        return numAdvancements <= 0 ? 1 : 1 + numAdvancements*((mb-1)+getCurrentMultiplierGain())/2.0;
+        return numAdvancements <= 0 ? 1 : 1 + EWMath.summate(numAdvancements,d1(),getCurrentMultiplierGain());
+    }
+    private double d1(){
+        if(EWCFG.getInstance().multipliersExponentialGain.value()){
+            return Math.abs(getMultiplierBase())-1;
+        }
+        else{
+            return Math.abs(getMultiplierBase());
+        }
     }
     public double getMultiplierBase(){
-        double mb = Math.abs(EWCFG.getInstance().advancementMultiplierBase.value());
-        if(mb < 1){
-            mb+=1;
-        }
-        return mb;
+        return EWCFG.getInstance().advancementMultiplierBase.value();
     }
 
     public double getCurrentMultiplierGain() {
         int numAdvancements = ServerStatistics.getData().advancers.size();
         double mb = getMultiplierBase();
-        return EWCFG.getInstance().multipliersExponentialGain.getBoolean() ? Math.pow(mb,numAdvancements)-1 : mb*numAdvancements-1;
+        return EWCFG.getInstance().multipliersExponentialGain.getBoolean() ? EWMath.baseToTheX(mb,numAdvancements,-1) : mb*numAdvancements;
     }
 }

@@ -1,13 +1,16 @@
 package com.vicious.experiencedworlds.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -15,6 +18,7 @@ import java.util.function.Predicate;
 public class FairnessFixer {
     private static final int range = 5;
     private static BlockPos vec = null;
+    private static boolean isOcean = false;
     public static boolean checkFair(int x, int z, Level l){
         AtomicInteger airCount = new AtomicInteger();
         BlockPos topBlock = scanDown(x, z, l, (state) -> {
@@ -25,6 +29,17 @@ public class FairnessFixer {
             }
             return airCount.get() == 2;
         });
+        Optional<ResourceKey<Biome>> key = l.getBiome(topBlock).unwrapKey();
+        if(key.isPresent()){
+            ResourceKey<Biome> k2 = key.get();
+            if(k2.location().getPath().contains("ocean")){
+                isOcean=true;
+                return false;
+            }
+            else{
+                isOcean=false;
+            }
+        }
         Set<Block> blocksFound = new HashSet<>();
         Set<BlockPos> leafPos = new HashSet<>();
         if(isSafeSpawnBlock(l.getBlockState(topBlock))){
@@ -70,14 +85,20 @@ public class FairnessFixer {
                 vecX = vec.getX()/Math.abs(vec.getX());
                 vecZ = vec.getZ()/Math.abs(vec.getZ());
             }
-            x+=vecX;
-            z+=vecZ;
+            if(!isOcean) {
+                x += vecX;
+                z += vecZ;
+            }
+            else{
+                x += vecX*20;
+                z += vecZ*20;
+            }
         }
         throw new UnfairnessException();
     }
     private static final Set<Block> unsafeBlocks = Set.of(Blocks.ICE,Blocks.BLUE_ICE,Blocks.STONE,Blocks.CALCITE,Blocks.PACKED_ICE);
     public static boolean isSafeSpawnBlock(BlockState state){
-        if(state.getMaterial().isLiquid()) return false;
+        if(state.getMaterial().isLiquid() || state.requiresCorrectToolForDrops()) return false;
         return !unsafeBlocks.contains(state.getBlock());
     }
     public static BlockPos scanDown(int x, int z, Level l, Predicate<BlockState> validator){

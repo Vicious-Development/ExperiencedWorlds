@@ -1,7 +1,7 @@
 package com.vicious.experiencedworlds.common.data;
 
 public interface IWorldBorderData {
-    double getExpansions();
+    int getExpansions();
     void expand(int expansions);
     double getTransformedBorderSize();
 }
