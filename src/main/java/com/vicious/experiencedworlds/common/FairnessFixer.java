@@ -55,6 +55,17 @@ public class FairnessFixer {
                         topOption = topOption.below();
                         top = l.getBlockState(topOption);
                     }
+                    while(top.isAir()){
+                        topOption = topOption.below();
+                        top = l.getBlockState(topOption);
+                    }
+                    //Spawned on top of tree above stone type block.
+                    if(topOption.getZ() == z && topOption.getX() == x && top.requiresCorrectToolForDrops()){
+                        return false;
+                    }
+                    else if(!top.requiresCorrectToolForDrops()) {
+                        blocksFound.add(top.getBlock());
+                    }
                 }
             }
             if(leafPos.size() < 5){
@@ -98,7 +109,13 @@ public class FairnessFixer {
     }
     private static final Set<Block> unsafeBlocks = Set.of(Blocks.ICE,Blocks.BLUE_ICE,Blocks.STONE,Blocks.CALCITE,Blocks.PACKED_ICE);
     public static boolean isSafeSpawnBlock(BlockState state){
-        if(state.getMaterial().isLiquid() || state.requiresCorrectToolForDrops()) return false;
+        if(state.getMaterial().isLiquid()){
+            return false;
+        }
+        else if(state.requiresCorrectToolForDrops()){
+            isOcean=true;
+            return false;
+        }
         return !unsafeBlocks.contains(state.getBlock());
     }
     public static BlockPos scanDown(int x, int z, Level l, Predicate<BlockState> validator){
