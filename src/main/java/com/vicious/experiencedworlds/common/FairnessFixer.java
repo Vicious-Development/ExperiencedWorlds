@@ -53,9 +53,16 @@ public class FairnessFixer {
                         topOption = topOption.below();
                         top = l.getBlockState(topOption);
                     }
+                    while(top.isAir()){
+                        topOption = topOption.below();
+                        top = l.getBlockState(topOption);
+                    }
                     //Spawned on top of tree above stone type block.
                     if(topOption.getZ() == z && topOption.getX() == x && top.requiresCorrectToolForDrops()){
                         return false;
+                    }
+                    else if(!top.requiresCorrectToolForDrops()){
+                        blocksFound.add(top.getBlock());
                     }
                 }
             }
