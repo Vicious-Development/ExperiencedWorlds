@@ -20,6 +20,7 @@ public class FairnessFixer {
     private static BlockPos vec = null;
     private static boolean isOcean = false;
     public static boolean checkFair(int x, int z, Level l){
+        isOcean=false;
         AtomicInteger airCount = new AtomicInteger();
         BlockPos topBlock = scanDown(x, z, l, (state) -> {
             if (state.getBlock() == Blocks.AIR) {
@@ -35,9 +36,6 @@ public class FairnessFixer {
             if(k2.location().getPath().contains("ocean")){
                 isOcean=true;
                 return false;
-            }
-            else{
-                isOcean=false;
             }
         }
         Set<Block> blocksFound = new HashSet<>();
@@ -55,6 +53,10 @@ public class FairnessFixer {
                         topOption = topOption.below();
                         top = l.getBlockState(topOption);
                     }
+                    //Spawned on top of tree above stone type block.
+                    if(topOption.getZ() == z && topOption.getX() == x && top.requiresCorrectToolForDrops()){
+                        return false;
+                    }
                 }
             }
             if(leafPos.size() < 5){
@@ -69,8 +71,8 @@ public class FairnessFixer {
         return false;
     }
     public static BlockPos getFairPos(int x, int z, Level l) throws UnfairnessException {
-        int vecX = l.getRandom().nextIntBetweenInclusive(-1,1);
-        int vecZ = l.getRandom().nextIntBetweenInclusive(-1,1);
+        int vecX = l.getRandom().nextInt(-1,2);
+        int vecZ = l.getRandom().nextInt(-1,2);
         //Avoid going nowhere.
         if(vecX == vecZ && vecX == 0){
             vecX = -1;
@@ -98,7 +100,13 @@ public class FairnessFixer {
     }
     private static final Set<Block> unsafeBlocks = Set.of(Blocks.ICE,Blocks.BLUE_ICE,Blocks.STONE,Blocks.CALCITE,Blocks.PACKED_ICE);
     public static boolean isSafeSpawnBlock(BlockState state){
-        if(state.getMaterial().isLiquid() || state.requiresCorrectToolForDrops()) return false;
+        if(state.getMaterial().isLiquid()){
+            return false;
+        }
+        else if(state.requiresCorrectToolForDrops()){
+            isOcean=true;
+            return false;
+        }
         return !unsafeBlocks.contains(state.getBlock());
     }
     public static BlockPos scanDown(int x, int z, Level l, Predicate<BlockState> validator){
