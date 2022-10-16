@@ -47,7 +47,7 @@ public class FairnessFixer {
                 for (int z2 = -range; z2 < range; z2++) {
                     BlockPos topOption = scanDown(x+x2, z+z2, l, (state) -> state.getMaterial().isSolid());
                     BlockState top = l.getBlockState(topOption);
-                    while(!top.requiresCorrectToolForDrops()){
+                    while(!top.requiresCorrectToolForDrops() && !top.isAir()){
                         if(top.getBlock() instanceof LeavesBlock){
                             leafPos.add(topOption);
                         }

@@ -6,5 +6,10 @@
   "experiencedworlds.fairworld": "This world is confirmed to have a fair starting spawn! Thanks for playing Experienced Worlds!",
   "experiencedworlds.bordersize": "The world border size is %1$s blocks wide.",
   "experiencedworlds.expansions": "The world border has expanded %1$s times.",
-  "experiencedworlds.multiplier": "The world border multiplier is %1$s."
+  "experiencedworlds.multiplier": "The world border multiplier is %1$s.",
+  "experiencedworlds.nosuchlevel": "There is no world named %1$s",
+  "experiencedworlds.setworldmultiplier": "Set the world specific multiplier to %1$s",
+  "experiencedworlds.setworldsize": "Set the world specific size to %1$s",
+  "experiencedworlds.worldmultiplier": "1%$s's world border multiplier is %2$s",
+  "experiencedworlds.worldsize": "1%$s's world border size is %2$s"
 }

@@ -35,7 +35,6 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
 
     public double getSizeMultiplier() {
         int numAdvancements = ServerStatistics.getData().advancers.size();
-        double mb = getMultiplierBase();
         return numAdvancements <= 0 ? 1 : 1 + EWMath.summate(numAdvancements,d1(),getCurrentMultiplierGain());
     }
     private double d1(){
