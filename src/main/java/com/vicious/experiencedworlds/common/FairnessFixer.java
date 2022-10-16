@@ -20,7 +20,6 @@ public class FairnessFixer {
     private static BlockPos vec = null;
     private static boolean isOcean = false;
     public static boolean checkFair(int x, int z, Level l){
-        isOcean=false;
         AtomicInteger airCount = new AtomicInteger();
         BlockPos topBlock = scanDown(x, z, l, (state) -> {
             if (state.getBlock() == Blocks.AIR) {
@@ -37,6 +36,9 @@ public class FairnessFixer {
                 isOcean=true;
                 return false;
             }
+            else{
+                isOcean=false;
+            }
         }
         Set<Block> blocksFound = new HashSet<>();
         Set<BlockPos> leafPos = new HashSet<>();
@@ -45,7 +47,7 @@ public class FairnessFixer {
                 for (int z2 = -range; z2 < range; z2++) {
                     BlockPos topOption = scanDown(x+x2, z+z2, l, (state) -> state.getMaterial().isSolid());
                     BlockState top = l.getBlockState(topOption);
-                    while(!top.requiresCorrectToolForDrops()){
+                    while(!top.requiresCorrectToolForDrops() && !top.isAir()){
                         if(top.getBlock() instanceof LeavesBlock){
                             leafPos.add(topOption);
                         }
@@ -61,7 +63,7 @@ public class FairnessFixer {
                     if(topOption.getZ() == z && topOption.getX() == x && top.requiresCorrectToolForDrops()){
                         return false;
                     }
-                    else if(!top.requiresCorrectToolForDrops()){
+                    else if(!top.requiresCorrectToolForDrops()) {
                         blocksFound.add(top.getBlock());
                     }
                 }

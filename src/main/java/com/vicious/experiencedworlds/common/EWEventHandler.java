@@ -1,10 +1,16 @@
 package com.vicious.experiencedworlds.common;
 
 import com.vicious.experiencedworlds.ExperiencedWorlds;
+import com.vicious.experiencedworlds.common.data.EWWorldData;
+import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
+import com.vicious.experiencedworlds.common.data.IWorldSpecificEWDat;
 import com.vicious.experiencedworlds.common.data.SyncableWorldBorder;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
 import com.vicious.serverstatistics.common.event.StatChangedEvent;
+import com.vicious.viciouscore.common.capability.VCCapabilities;
+import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
+import com.vicious.viciouscore.common.util.FuckLazyOptionals;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -46,7 +52,11 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event){
         for (ServerLevel l : event.getServer().getAllLevels()) {
-            l.getWorldBorder().setSize(ExperiencedWorlds.getBorder().getTransformedBorderSize());
+            if(FuckLazyOptionals.getOrNull(l.getCapability(VCCapabilities.LEVELDATA)) instanceof IWorldSpecificEWDat ew) {
+                EWWorldData dat = ew.getExperiencedWorlds();
+                double newSize = ExperiencedWorlds.getBorder().getTransformedBorderSize() * Math.max(1, dat.multiplier.getValue()) + dat.startingSize.getValue();
+                l.getWorldBorder().setSize(newSize);
+            }
         }
     }
 
@@ -82,15 +92,27 @@ public class EWEventHandler {
         growBorder(swb);
     }
 
+    public static void growBorder(){
+        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(c)->{
+            growBorder(c.getExperiencedWorlds());
+        });
+    }
     private static void growBorder(SyncableWorldBorder swb){
-        double newSize = swb.getTransformedBorderSize();
         for (ServerLevel level : ServerHelper.server.getAllLevels()) {
-            WorldBorder border = level.getWorldBorder();
-            double size = border.getSize();
-            border.lerpSizeBetween(size, newSize, (long)Math.ceil(newSize-size) * 1000L + border.getLerpRemainingTime());
+            if(FuckLazyOptionals.getOrNull(level.getCapability(VCCapabilities.LEVELDATA)) instanceof IWorldSpecificEWDat ew) {
+                EWWorldData dat = ew.getExperiencedWorlds();
+                double newSize = swb.getTransformedBorderSize()*Math.max(1,dat.multiplier.getValue())+dat.startingSize.getValue();
+                WorldBorder border = level.getWorldBorder();
+                double size = border.getSize();
+                if(size <= newSize) {
+                    border.lerpSizeBetween(size, newSize, (long) Math.ceil(Math.abs(newSize - size)) * 1000L + border.getLerpRemainingTime());
+                }
+                else{
+                    border.lerpSizeBetween(newSize, size, (long) Math.ceil(Math.abs(newSize - size)) * 1000L + border.getLerpRemainingTime());
+                }
+            }
         }
     }
-
     @SubscribeEvent
     public static void onWorldInit(WorldEvent.CreateSpawnPosition event){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
