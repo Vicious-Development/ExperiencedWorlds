@@ -13,7 +13,6 @@ import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGl
 import com.vicious.viciouscore.common.util.FuckLazyOptionals;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,8 +22,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Set;
@@ -63,8 +62,10 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
-            if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1){
-                Minecraft.getInstance().execute(()-> EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>",EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
+            if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1) {
+                if (sp.getServer() != null) {
+                    sp.getServer().execute(() -> EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
+                }
             }
         }
     }
@@ -113,12 +114,13 @@ public class EWEventHandler {
             }
         }
     }
+
     @SubscribeEvent
-    public static void onWorldInit(WorldEvent.CreateSpawnPosition event){
+    public static void onWorldInit(LevelEvent.CreateSpawnPosition event){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
-        if(swb.fairnesslevel.getValue() == -1) {
-            Minecraft.getInstance().execute(() -> {
-                if (event.getWorld() instanceof ServerLevel sl) {
+        if(event.getLevel() instanceof ServerLevel sl){
+            if(swb.fairnesslevel.getValue() == -1) {
+                sl.getServer().execute(() -> {
                     if (ServerHelper.server.overworld().equals(sl)) {
                         WorldBorder border = sl.getWorldBorder();
                         BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
@@ -130,17 +132,16 @@ public class EWEventHandler {
                             swb.fairnesslevel.setValue(0);
                         }
                         for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
-                            if(swb.fairnesslevel.getValue() == 0){
-                                EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
-                            }
-                            else{
-                                EWChatMessage.from(ChatFormatting.GREEN,ChatFormatting.BOLD,"<experiencedworlds.fairworld>").send(player);
+                            if (swb.fairnesslevel.getValue() == 0) {
+                                EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
+                            } else {
+                                EWChatMessage.from(ChatFormatting.GREEN, ChatFormatting.BOLD, "<experiencedworlds.fairworld>").send(player);
                             }
                             player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
                         }
                     }
-                }
-            });
+                });
+            }
         }
-}
+    }
 }
