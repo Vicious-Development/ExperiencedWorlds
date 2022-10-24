@@ -23,6 +23,7 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -156,6 +157,13 @@ public class EWEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onDamage(LivingDamageEvent event){
+        if(difficulty != null){
+            event.setCanceled(true);
+        }
+    }
+
     private static Difficulty difficulty;
     private static void pauseWorld(ServerLevel sl){
         if(difficulty == null){
@@ -163,6 +171,7 @@ public class EWEventHandler {
         }
         else{
             sl.getServer().setDifficulty(difficulty,true);
+            difficulty = null;
         }
     }
 }
