@@ -20,6 +20,8 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -66,6 +68,10 @@ public class EWEventHandler {
                 if (sp.getServer() != null) {
                     sp.getServer().execute(() -> EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
                 }
+            }
+            else if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() == -1){
+                EWChatMessage.from(ChatFormatting.GREEN, "<experiencedworlds.searchingforsafety>").send(sp);
+                sp.setGameMode(GameType.ADVENTURE);
             }
         }
     }
@@ -120,7 +126,8 @@ public class EWEventHandler {
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
         if(event.getLevel() instanceof ServerLevel sl){
             if(swb.fairnesslevel.getValue() == -1) {
-                sl.getServer().execute(() -> {
+                pauseWorld(sl);
+                ServerExecutor.execute(() -> {
                     if (ServerHelper.server.overworld().equals(sl)) {
                         WorldBorder border = sl.getWorldBorder();
                         BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
@@ -132,6 +139,9 @@ public class EWEventHandler {
                             swb.fairnesslevel.setValue(0);
                         }
                         for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
+                            if(player.gameMode.isSurvival()){
+                                player.setGameMode(GameType.SURVIVAL);
+                            }
                             if (swb.fairnesslevel.getValue() == 0) {
                                 EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
                             } else {
@@ -139,9 +149,20 @@ public class EWEventHandler {
                             }
                             player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
                         }
+                        pauseWorld(sl);
                     }
                 });
             }
+        }
+    }
+
+    private static Difficulty difficulty;
+    private static void pauseWorld(ServerLevel sl){
+        if(difficulty == null){
+            difficulty = sl.getDifficulty();
+        }
+        else{
+            sl.getServer().setDifficulty(difficulty,true);
         }
     }
 }
