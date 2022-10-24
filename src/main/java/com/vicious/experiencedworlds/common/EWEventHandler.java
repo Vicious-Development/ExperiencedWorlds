@@ -13,7 +13,6 @@ import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGl
 import com.vicious.viciouscore.common.util.FuckLazyOptionals;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,8 +62,10 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
-            if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1){
-                Minecraft.getInstance().execute(()-> EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>",EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
+            if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1) {
+                if (sp.getServer() != null) {
+                    sp.getServer().execute(() -> EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
+                }
             }
         }
     }
@@ -117,9 +118,9 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void onWorldInit(LevelEvent.CreateSpawnPosition event){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
-        if(swb.fairnesslevel.getValue() == -1) {
-            Minecraft.getInstance().execute(() -> {
-                if (event.getLevel() instanceof ServerLevel sl) {
+        if(event.getLevel() instanceof ServerLevel sl){
+            if(swb.fairnesslevel.getValue() == -1) {
+                sl.getServer().execute(() -> {
                     if (ServerHelper.server.overworld().equals(sl)) {
                         WorldBorder border = sl.getWorldBorder();
                         BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
@@ -131,17 +132,16 @@ public class EWEventHandler {
                             swb.fairnesslevel.setValue(0);
                         }
                         for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
-                            if(swb.fairnesslevel.getValue() == 0){
-                                EWChatMessage.from(ChatFormatting.RED,ChatFormatting.BOLD,"<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
-                            }
-                            else{
-                                EWChatMessage.from(ChatFormatting.GREEN,ChatFormatting.BOLD,"<experiencedworlds.fairworld>").send(player);
+                            if (swb.fairnesslevel.getValue() == 0) {
+                                EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
+                            } else {
+                                EWChatMessage.from(ChatFormatting.GREEN, ChatFormatting.BOLD, "<experiencedworlds.fairworld>").send(player);
                             }
                             player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
                         }
                     }
-                }
-            });
+                });
+            }
         }
-}
+    }
 }
