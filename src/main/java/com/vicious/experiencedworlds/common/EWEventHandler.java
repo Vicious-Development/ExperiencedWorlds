@@ -22,8 +22,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.Set;
@@ -116,9 +116,9 @@ public class EWEventHandler {
     }
 
     @SubscribeEvent
-    public static void onWorldInit(LevelEvent.CreateSpawnPosition event){
+    public static void onWorldInit(WorldEvent.CreateSpawnPosition event){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
-        if(event.getLevel() instanceof ServerLevel sl){
+        if(event.getWorld() instanceof ServerLevel sl){
             if(swb.fairnesslevel.getValue() == -1) {
                 sl.getServer().execute(() -> {
                     if (ServerHelper.server.overworld().equals(sl)) {
