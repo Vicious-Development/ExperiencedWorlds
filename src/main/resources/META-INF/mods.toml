@@ -13,6 +13,6 @@ The world expands the more you experience it.
 [[dependencies.experiencedworlds]] #optional
     modId="serverstatistics" #mandatory
     mandatory=true #mandatory
-    versionRange="[1.19.2-1.0.8,)" #mandatory
+    versionRange="[1.19.2-1.0.9,)" #mandatory
     ordering="AFTER"
     side="BOTH"
