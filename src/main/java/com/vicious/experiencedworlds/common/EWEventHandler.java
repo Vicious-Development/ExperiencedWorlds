@@ -7,6 +7,7 @@ import com.vicious.experiencedworlds.common.data.IWorldSpecificEWDat;
 import com.vicious.experiencedworlds.common.data.SyncableWorldBorder;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
+import com.vicious.serverstatistics.common.event.ServerStatsResetEvent;
 import com.vicious.serverstatistics.common.event.StatChangedEvent;
 import com.vicious.viciouscore.common.capability.VCCapabilities;
 import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
@@ -65,6 +66,15 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
+            if(hasReset){
+                ExperiencedWorlds.getBorder().fairnesslevel.setValue(1);
+                sp.getServer().execute(()->{
+                    ServerLevel sl = sp.getLevel();
+                    WorldBorder border = sl.getWorldBorder();
+                    BlockPos fairCenter = FairnessFixer.scanDown((int) border.getCenterX(), (int) border.getCenterZ(),sl,(bs)->bs.getMaterial().isSolid());
+                    sp.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
+                });
+            }
             if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() > 1) {
                 if (sp.getServer() != null) {
                     sp.getServer().execute(() -> EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(sp));
@@ -75,6 +85,13 @@ public class EWEventHandler {
                 sp.setGameMode(GameType.ADVENTURE);
             }
         }
+    }
+    public static boolean hasReset = false;
+
+    @SubscribeEvent
+    public static void serverStatsReset(ServerStatsResetEvent reset){
+        ExperiencedWorlds.getBorder().reset();
+        hasReset = true;
     }
 
 
@@ -105,7 +122,9 @@ public class EWEventHandler {
             growBorder(c.getExperiencedWorlds());
         });
     }
+    private static long lastExpand = System.currentTimeMillis();
     private static void growBorder(SyncableWorldBorder swb){
+        boolean doFastExpand = lastExpand+1000 > System.currentTimeMillis();
         for (ServerLevel level : ServerHelper.server.getAllLevels()) {
             if(FuckLazyOptionals.getOrNull(level.getCapability(VCCapabilities.LEVELDATA)) instanceof IWorldSpecificEWDat ew) {
                 EWWorldData dat = ew.getExperiencedWorlds();
@@ -113,13 +132,14 @@ public class EWEventHandler {
                 WorldBorder border = level.getWorldBorder();
                 double size = border.getSize();
                 if(size <= newSize) {
-                    border.lerpSizeBetween(size, newSize, (long) Math.ceil(Math.abs(newSize - size)) * 1000L + border.getLerpRemainingTime());
+                    border.lerpSizeBetween(size, newSize, (long) Math.ceil(Math.abs(newSize - size)) * (!doFastExpand ? 1000L : 1L) + border.getLerpRemainingTime());
                 }
                 else{
-                    border.lerpSizeBetween(newSize, size, (long) Math.ceil(Math.abs(newSize - size)) * 1000L + border.getLerpRemainingTime());
+                    border.lerpSizeBetween(newSize, size, (long) Math.ceil(Math.abs(newSize - size)) * (!doFastExpand ? 1000L : 1L) + border.getLerpRemainingTime());
                 }
             }
         }
+        lastExpand = System.currentTimeMillis();
     }
 
     @SubscribeEvent

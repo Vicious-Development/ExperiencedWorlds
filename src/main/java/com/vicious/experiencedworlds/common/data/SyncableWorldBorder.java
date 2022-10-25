@@ -55,4 +55,8 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
         double mb = getMultiplierBase();
         return EWCFG.getInstance().multipliersExponentialGain.getBoolean() ? EWMath.baseToTheX(mb,numAdvancements,-1) : mb*numAdvancements;
     }
+
+    public void reset() {
+        expansions.setValue(0);
+    }
 }
