@@ -6,7 +6,7 @@ import com.vicious.experiencedworlds.common.EWCommands;
 import com.vicious.experiencedworlds.common.EWEventHandler;
 import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
 import com.vicious.experiencedworlds.common.data.SyncableWorldBorder;
-import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
+import com.vicious.viciouscore.common.data.GlobalData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class ExperiencedWorlds {
         MinecraftForge.EVENT_BUS.register(EWCommands.class);
     }
     public static SyncableWorldBorder getBorder(){
-        IExperiencedWorlds iew = (IExperiencedWorlds) SyncableGlobalData.getInstance();
+        IExperiencedWorlds iew = (IExperiencedWorlds) GlobalData.getGlobalData();
         return iew.getExperiencedWorlds();
     }
 }
