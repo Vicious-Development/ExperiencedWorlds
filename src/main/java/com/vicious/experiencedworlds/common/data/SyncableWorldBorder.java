@@ -4,8 +4,10 @@ import com.vicious.experiencedworlds.common.EWCFG;
 import com.vicious.experiencedworlds.common.EWMath;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.viciouscore.aunotamation.isyncablecompoundholder.annotation.Obscured;
+import com.vicious.viciouscore.common.data.DataAccessor;
 import com.vicious.viciouscore.common.data.structures.SyncableCompound;
 import com.vicious.viciouscore.common.data.structures.SyncablePrimitive;
+import net.minecraft.nbt.CompoundTag;
 
 public class SyncableWorldBorder extends SyncableCompound implements IWorldBorderData {
     @Obscured
@@ -53,6 +55,11 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
         int numAdvancements = ServerStatistics.getData().advancers.size();
         double mb = getMultiplierBase();
         return EWCFG.getInstance().multipliersExponentialGain.getBoolean() ? EWMath.baseToTheX(mb,numAdvancements,-1) : mb*numAdvancements;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag tag, DataAccessor sender) {
+        super.deserializeNBT(tag, sender);
     }
 
     public void reset() {

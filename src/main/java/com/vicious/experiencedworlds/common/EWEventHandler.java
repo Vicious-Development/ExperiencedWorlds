@@ -10,7 +10,7 @@ import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
 import com.vicious.serverstatistics.common.event.ServerStatsResetEvent;
 import com.vicious.serverstatistics.common.event.StatChangedEvent;
 import com.vicious.viciouscore.common.capability.VCCapabilities;
-import com.vicious.viciouscore.common.data.implementations.attachable.SyncableGlobalData;
+import com.vicious.viciouscore.common.data.GlobalData;
 import com.vicious.viciouscore.common.util.FuckLazyOptionals;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.ChatFormatting;
@@ -118,7 +118,7 @@ public class EWEventHandler {
     }
 
     public static void growBorder(){
-        SyncableGlobalData.getInstance().executeAs(IExperiencedWorlds.class,(c)->{
+        GlobalData.getGlobalData().executeAs(IExperiencedWorlds.class,(c)->{
             growBorder(c.getExperiencedWorlds());
         });
     }
