@@ -63,6 +63,8 @@ public class EWEventHandler {
         }
     }
 
+    private static boolean fairnessCheckActive = false;
+
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(event.getEntity() instanceof ServerPlayer sp){
@@ -81,8 +83,13 @@ public class EWEventHandler {
                 }
             }
             else if(ExperiencedWorlds.getBorder().fairnesslevel.getValue() == -1){
-                EWChatMessage.from(ChatFormatting.GREEN, "<experiencedworlds.searchingforsafety>").send(sp);
-                sp.setGameMode(GameType.ADVENTURE);
+                if(fairnessCheckActive) {
+                    EWChatMessage.from(ChatFormatting.GREEN, "<experiencedworlds.searchingforsafety>").send(sp);
+                    sp.setGameMode(GameType.ADVENTURE);
+                }
+                else{
+                    ExperiencedWorlds.getBorder().fairnesslevel.setValue(1);
+                }
             }
         }
     }
@@ -148,6 +155,7 @@ public class EWEventHandler {
         if(event.getLevel() instanceof ServerLevel sl){
             if(swb.fairnesslevel.getValue() == -1) {
                 pauseWorld(sl);
+                fairnessCheckActive=true;
                 ServerExecutor.execute(() -> {
                     if (ServerHelper.server.overworld().equals(sl)) {
                         WorldBorder border = sl.getWorldBorder();
@@ -159,6 +167,7 @@ public class EWEventHandler {
                         } catch (FairnessFixer.UnfairnessException e) {
                             swb.fairnesslevel.setValue(0);
                         }
+                        fairnessCheckActive=false;
                         for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
                             if(player.gameMode.isSurvival()){
                                 player.setGameMode(GameType.SURVIVAL);
