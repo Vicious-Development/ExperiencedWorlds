@@ -1,5 +1,6 @@
 package com.vicious.experiencedworlds.common;
 
+import com.vicious.experiencedworlds.common.config.EWCFG;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -89,7 +90,7 @@ public class FairnessFixer {
         }
         vecX*=range;
         vecZ*=range;
-        long time = System.currentTimeMillis()+EWCFG.getInstance().fairnessCheckMaximumTime.value()*1000;
+        long time = System.currentTimeMillis()+(((long)(int)EWCFG.getInstance().fairnessCheckMaximumTime.value().longValue())*1000L);
         while(System.currentTimeMillis() < time) {
             if(checkFair(x,z,l)) return scanDown(x,z,l,(b)->b.getMaterial().isSolid());
             if(vec != null){
