@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.vicious.experiencedworlds.ExperiencedWorlds;
+import com.vicious.experiencedworlds.common.config.EWCFG;
 import com.vicious.experiencedworlds.common.data.EWWorldData;
 import com.vicious.experiencedworlds.common.data.IWorldSpecificEWDat;
 import com.vicious.viciouscore.common.capability.VCCapabilities;
@@ -12,6 +13,7 @@ import com.vicious.viciouscore.common.util.FuckLazyOptionals;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -33,6 +35,14 @@ public class EWCommands {
                                 .executes(ctx->message(ctx,EWChatMessage.from("<1experiencedworlds.multiplier>", ExperiencedWorlds.getBorder().getSizeMultiplier())))
                         )
                 )
+                .then(Commands.literal("config")
+                        .requires((ctx)->ctx.hasPermission(Commands.LEVEL_ADMINS) || inIntegratedServer(ctx))
+                        .then(Commands.literal("reload")
+                                .executes(ctx->{
+                                    EWCFG.getInstance().load();
+                                    EWCFG.getInstance().save();
+                                    return 1;
+                                })))
                 .then(Commands.literal("world")
                         .executes((ctx)->{
                             EWChatMessage.from(getWorld(ctx).getLevelData()).send(ctx);
@@ -72,6 +82,14 @@ public class EWCommands {
                 );
         event.getDispatcher().register(cmd);
     }
+
+    /**
+     * Allows usage on singleplayer and LAN worlds.
+     */
+    private static boolean inIntegratedServer(CommandSourceStack ctx) {
+        return !(ctx.getServer() instanceof DedicatedServer);
+    }
+
     private static int message(CommandContext<CommandSourceStack> ctx, EWChatMessage cm){
         CommandSourceStack stack = ctx.getSource();
         cm.send(stack);

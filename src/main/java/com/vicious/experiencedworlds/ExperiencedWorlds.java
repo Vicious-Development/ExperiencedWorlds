@@ -1,7 +1,7 @@
 package com.vicious.experiencedworlds;
 
 import com.mojang.logging.LogUtils;
-import com.vicious.experiencedworlds.common.EWCFG;
+import com.vicious.experiencedworlds.common.config.EWCFG;
 import com.vicious.experiencedworlds.common.EWCommands;
 import com.vicious.experiencedworlds.common.EWEventHandler;
 import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
@@ -18,7 +18,8 @@ public class ExperiencedWorlds {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ExperiencedWorlds() {
-        EWCFG.getInstance();
+        EWCFG.getInstance().load();
+        EWCFG.getInstance().save();
         MinecraftForge.EVENT_BUS.register(EWEventHandler.class);
         MinecraftForge.EVENT_BUS.register(EWCommands.class);
     }

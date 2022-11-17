@@ -1,6 +1,6 @@
 package com.vicious.experiencedworlds.common.data;
 
-import com.vicious.experiencedworlds.common.EWCFG;
+import com.vicious.experiencedworlds.common.config.EWCFG;
 import com.vicious.experiencedworlds.common.EWMath;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.viciouscore.aunotamation.isyncablecompoundholder.annotation.Obscured;
@@ -55,7 +55,7 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     public double getCurrentMultiplierGain() {
         int numAdvancements = ServerStatistics.getData().advancers.size();
         double mb = getMultiplierBase();
-        return EWCFG.getInstance().multipliersExponentialGain.getBoolean() ? EWMath.baseToTheX(mb,numAdvancements,-1) : mb*numAdvancements;
+        return EWCFG.getInstance().multipliersExponentialGain.value() ? EWMath.baseToTheX(mb,numAdvancements,-1) : mb*numAdvancements;
     }
 
     @Override
