@@ -16,3 +16,9 @@ The world expands the more you experience it.
     versionRange="[1.19.2-1.1.8,)" #mandatory
     ordering="AFTER"
     side="BOTH"
+[[dependencies.experiencedworlds]] #optional
+    modId="viciouscore" #mandatory
+    mandatory=true #mandatory
+    versionRange="[1.19.2-4.7.6,)" #mandatory
+    ordering="AFTER"
+    side="BOTH"
