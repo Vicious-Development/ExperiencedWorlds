@@ -1,6 +1,7 @@
 package com.vicious.experiencedworlds.common;
 
 import com.vicious.experiencedworlds.ExperiencedWorlds;
+import com.vicious.experiencedworlds.common.config.EWCFG;
 import com.vicious.experiencedworlds.common.data.EWWorldData;
 import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
 import com.vicious.experiencedworlds.common.data.IWorldSpecificEWDat;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -106,7 +106,9 @@ public class EWEventHandler {
     public static void increaseMultiplier(AdvancedFirstTimeEvent afte){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
         double a2 = Math.round(swb.getCurrentMultiplierGain()*100.0)/100.0;
-        EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
+        if(EWCFG.getInstance().sendAdvancementAnnouncements()) {
+            EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
+        }
         growBorder(swb);
     }
 
@@ -115,11 +117,12 @@ public class EWEventHandler {
         swb.expand(amount);
         double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
         int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
-        if(a2 != 1) {
-            EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
-        }
-        else{
-            EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
+        if(EWCFG.getInstance().sendBorderGrowthAnnouncements()) {
+            if (a2 != 1) {
+                EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current + 1, a2).send(ServerHelper.getPlayers());
+            } else {
+                EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current + 1).send(ServerHelper.getPlayers());
+            }
         }
         growBorder(swb);
     }
@@ -147,43 +150,6 @@ public class EWEventHandler {
             }
         }
         lastExpand = System.currentTimeMillis();
-    }
-
-    @SubscribeEvent
-    public static void onWorldInit(WorldEvent.CreateSpawnPosition event){
-        SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
-        if(event.getWorld() instanceof ServerLevel sl){
-            if(swb.fairnesslevel.getValue() == -1) {
-                pauseWorld(sl);
-                fairnessCheckActive=true;
-                ServerExecutor.execute(() -> {
-                    if (ServerHelper.server.overworld().equals(sl)) {
-                        WorldBorder border = sl.getWorldBorder();
-                        BlockPos fairCenter = FairnessFixer.scanDown(0, 0, sl, (bs) -> bs.getMaterial().isSolid());
-                        try {
-                            fairCenter = FairnessFixer.getFairPos((int) border.getCenterX(), (int) border.getCenterZ(), sl);
-                            border.setCenter(fairCenter.getX(), fairCenter.getZ());
-                            swb.fairnesslevel.setValue(1);
-                        } catch (FairnessFixer.UnfairnessException e) {
-                            swb.fairnesslevel.setValue(0);
-                        }
-                        fairnessCheckActive=false;
-                        for (ServerPlayer player : ServerHelper.server.getPlayerList().getPlayers()) {
-                            if(player.gameMode.isSurvival()){
-                                player.setGameMode(GameType.SURVIVAL);
-                            }
-                            if (swb.fairnesslevel.getValue() == 0) {
-                                EWChatMessage.from(ChatFormatting.RED, ChatFormatting.BOLD, "<1experiencedworlds.unfairworld>", EWCFG.getInstance().fairnessCheckMaximumTime.value()).send(player);
-                            } else {
-                                EWChatMessage.from(ChatFormatting.GREEN, ChatFormatting.BOLD, "<experiencedworlds.fairworld>").send(player);
-                            }
-                            player.teleportTo(sl, fairCenter.getX(), fairCenter.getY() + 1, fairCenter.getZ(), 0, 0);
-                        }
-                        pauseWorld(sl);
-                    }
-                });
-            }
-        }
     }
 
     @SubscribeEvent
