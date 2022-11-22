@@ -62,6 +62,9 @@ public class EWCFG extends JSONFile {
     @Save(description = "The starting world border size.", parent = "GameplayBalanced")
     public SpyableAttribute<Double> startingSize = new SpyableAttribute<>("StartingBorderSize",Double.class,1.0);
 
+    @Save(description = "The maximum advancement multiplier that can be reached.", parent = "GameplayBalanced")
+    public SpyableAttribute<Double> advancementMultiplierMax = new SpyableAttribute<>("AdvancementMultiplierMax",Double.class,50.0);
+
     @Save(description = "The amount of time in milliseconds the border takes to grow 0.5 blocks on every edge (aka increase width by 1 block)", parent = "GameplayBalanced")
     public PersistentAttribute<Long> borderGrowthSpeed = new PersistentAttribute<>("BorderGrowthSpeed",Long.class,1000L);
 
@@ -73,6 +76,7 @@ public class EWCFG extends JSONFile {
 
     @Save(description = "The maximum amount of time spent finding a viable spawn position. By default the vanilla world border is set to 0,0. Very often this can be in the middle of the ocean, the mod will try to find a valid spawn as close to 0,0 as it can.")
     public PersistentAttribute<Long> fairnessCheckMaximumTime = new PersistentAttribute<>("MaximumFairnessCheckingTime",Long.class,60L);
+
 
     public boolean sendAdvancementAnnouncements(){
         return chatAnnouncements.get() && advancementAnnouncements.get();
