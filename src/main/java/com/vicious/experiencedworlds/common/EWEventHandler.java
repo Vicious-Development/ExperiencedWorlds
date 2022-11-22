@@ -146,8 +146,11 @@ public class EWEventHandler {
     @SubscribeEvent
     public static void increaseMultiplier(AdvancedFirstTimeEvent afte){
         SyncableWorldBorder swb = ExperiencedWorlds.getBorder();
+        boolean announce = EWCFG.getInstance().sendAdvancementAnnouncements() && !swb.maximumMultiplier();
         double a2 = Math.round(swb.getCurrentMultiplierGain()*100.0)/100.0;
-        if(EWCFG.getInstance().sendAdvancementAnnouncements()) EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
+        if(announce){
+            EWChatMessage.from("<3experiencedworlds.advancementattained>",afte.getPlayer().getDisplayName(),a2,Math.round(swb.getSizeMultiplier()*100.0)/100.0).send(ServerHelper.getPlayers());
+        }
         growBorder(swb);
     }
 

@@ -35,10 +35,18 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
         return EWCFG.getInstance().startingSize.value()+expansions.getValue()*EWCFG.getInstance().sizeGained.value()*getSizeMultiplier();
     }
 
-    public double getSizeMultiplier() {
+    public boolean maximumMultiplier(){
+        return getUnmaxedSizeMultiplier() >= EWCFG.getInstance().advancementMultiplierMax.get();
+    }
+
+    public double getUnmaxedSizeMultiplier(){
         int numAdvancements = ServerStatistics.getData().advancers.size();
         double mb = getMultiplierBase();
         return numAdvancements <= 0 ? 1 : 1 + EWMath.summate(numAdvancements,d1(),getCurrentMultiplierGain());
+    }
+
+    public double getSizeMultiplier() {
+        return Math.max(getUnmaxedSizeMultiplier(),EWCFG.getInstance().advancementMultiplierMax.get());
     }
     private double d1(){
         if(EWCFG.getInstance().multipliersExponentialGain.value()){
