@@ -47,12 +47,12 @@ public class EWEventHandler {
             StatsCounter counter = ServerStatistics.getData().counter.getValue();
             int current = counter.getValue(stat);
             if (current > 0) {
-                int borderChange = EWCFG.getInstance().logarithmicStatRequirement.get() ? (int)Math.log10(current + sce.getChange()) - (int)Math.log10(current) : current+sce.getChange() - current;
+                int borderChange = EWCFG.getInstance().logarithmicStatRequirement.get() ? (int)EWMath.logConfigBase(current + sce.getChange()) - (int)EWMath.logConfigBase(current) : current+sce.getChange() - current;
                 if (borderChange != 0) {
                     increaseBorder(borderChange, sce);
                 }
-            } else {
-                increaseBorder(Math.max(1,EWCFG.getInstance().logarithmicStatRequirement.get() ? (int) Math.log10(current + sce.getChange()) : current + sce.getChange()), sce);
+            } else if(EWCFG.getInstance().awardOne.get()) {
+                increaseBorder(1, sce);
             }
         }
     }
@@ -169,9 +169,7 @@ public class EWEventHandler {
     }
 
     public static void growBorder(){
-        GlobalData.getGlobalData().executeAs(IExperiencedWorlds.class,(c)->{
-            growBorder(c.getExperiencedWorlds());
-        });
+        GlobalData.getGlobalData().executeAs(IExperiencedWorlds.class,(c)-> growBorder(c.getExperiencedWorlds()));
     }
     private static long lastExpand = System.currentTimeMillis();
     private static void growBorder(SyncableWorldBorder swb){
@@ -182,11 +180,12 @@ public class EWEventHandler {
                 double newSize = swb.getTransformedBorderSize()*Math.max(1,dat.multiplier.getValue())+dat.startingSize.getValue();
                 WorldBorder border = level.getWorldBorder();
                 double size = border.getSize();
+                long change = (long) Math.ceil(Math.abs(newSize - size));
                 if(size <= newSize) {
-                    border.lerpSizeBetween(size, newSize, (long) Math.ceil(Math.abs(newSize - size)) * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
+                    border.lerpSizeBetween(size, newSize,  change * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
                 }
                 else{
-                    border.lerpSizeBetween(newSize, size, (long) Math.ceil(Math.abs(newSize - size)) * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
+                    border.lerpSizeBetween(newSize, size, change * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
                 }
             }
         }
