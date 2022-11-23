@@ -46,7 +46,7 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     }
 
     public double getSizeMultiplier() {
-        return Math.max(getUnmaxedSizeMultiplier(),EWCFG.getInstance().advancementMultiplierMax.get());
+        return Math.min(getUnmaxedSizeMultiplier(),EWCFG.getInstance().advancementMultiplierMax.get());
     }
     private double d1(){
         if(EWCFG.getInstance().multipliersExponentialGain.value()){
