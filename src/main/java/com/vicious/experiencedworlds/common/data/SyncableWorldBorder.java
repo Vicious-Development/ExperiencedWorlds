@@ -32,7 +32,7 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
 
     @Override
     public double getTransformedBorderSize() {
-        return EWCFG.getInstance().startingSize.value()+expansions.getValue()*EWCFG.getInstance().sizeGained.value()*getSizeMultiplier();
+        return Math.min(EWCFG.getInstance().startingSize.value()+expansions.getValue()*EWCFG.getInstance().sizeGained.value()*getSizeMultiplier(),EWCFG.getInstance().maximumBorderSize.get());
     }
 
     public boolean maximumMultiplier(){
