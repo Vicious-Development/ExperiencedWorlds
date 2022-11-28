@@ -1,6 +1,7 @@
 package com.vicious.experiencedworlds.common;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -34,6 +35,10 @@ public class EWCommands {
                         .then(Commands.literal("multiplier")
                                 .executes(ctx->message(ctx,EWChatMessage.from("<1experiencedworlds.multiplier>", ExperiencedWorlds.getBorder().getSizeMultiplier())))
                         )
+                        .then(Commands.literal("grow")
+                                .requires(ctx->ctx.hasPermission(Commands.LEVEL_ADMINS))
+                                .executes(ctx->grow(1))
+                                .then(Commands.argument("numgrowths", IntegerArgumentType.integer()).executes(ctx->grow(IntegerArgumentType.getInteger(ctx,"numgrowths")))))
                 )
                 .then(Commands.literal("config")
                         .requires((ctx)->ctx.hasPermission(Commands.LEVEL_ADMINS) || inIntegratedServer(ctx))
@@ -81,6 +86,12 @@ public class EWCommands {
                         )
                 );
         event.getDispatcher().register(cmd);
+    }
+
+    private static int grow(int amount) {
+        ExperiencedWorlds.getBorder().expand(amount);
+        EWEventHandler.growBorder();
+        return 1;
     }
 
     /**
