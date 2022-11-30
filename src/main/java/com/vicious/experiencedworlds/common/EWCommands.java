@@ -91,7 +91,7 @@ public class EWCommands {
 
     private static int grow(int amount) {
         ExperiencedWorlds.getBorder().expand(amount);
-        EWEventHandler.growBorder();
+        BorderManager.growBorder();
         return 1;
     }
 
@@ -124,7 +124,7 @@ public class EWCommands {
             dat.multiplier.setValue(DoubleArgumentType.getDouble(ctx,"value"));
             EWChatMessage.from("<1experiencedworlds.setworldmultiplier>",dat.multiplier.getValue()).send(ctx);
         });
-        EWEventHandler.growBorder();
+        BorderManager.growBorder();
         return 1;
     }
     private static int setWorldSize(ServerLevel level, CommandContext<CommandSourceStack> ctx){
@@ -132,7 +132,7 @@ public class EWCommands {
             dat.startingSize.setValue(DoubleArgumentType.getDouble(ctx,"value"));
             EWChatMessage.from("<1experiencedworlds.setworldsize>",dat.startingSize.getValue()).send(ctx);
         });
-        EWEventHandler.growBorder();
+        BorderManager.growBorder();
         return 1;
     }
     private static void ifExists(ServerLevel level, CommandContext<CommandSourceStack> ctx, Consumer<EWWorldData> cons){

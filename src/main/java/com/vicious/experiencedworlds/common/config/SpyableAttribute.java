@@ -2,8 +2,8 @@ package com.vicious.experiencedworlds.common.config;
 
 import com.vicious.viciouslib.persistence.storage.PersistentAttribute;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class SpyableAttribute<T> extends PersistentAttribute<T> {
@@ -15,7 +15,7 @@ public class SpyableAttribute<T> extends PersistentAttribute<T> {
         super(name, expectedType, value);
     }
 
-    protected List<Consumer<SpyableAttribute<T>>> onUpdate = new ArrayList<>();
+    protected Set<Consumer<SpyableAttribute<T>>> onUpdate = new HashSet<>();
     public void listen(Consumer<SpyableAttribute<T>> run){
         onUpdate.add(run);
     }

@@ -1,6 +1,6 @@
 package com.vicious.experiencedworlds.common.config;
 
-import com.vicious.experiencedworlds.common.EWEventHandler;
+import com.vicious.experiencedworlds.common.BorderManager;
 import com.vicious.viciouscore.common.util.file.ViciousDirectories;
 import com.vicious.viciouscore.common.util.server.ServerHelper;
 import com.vicious.viciouslib.aunotamation.Aunotamation;
@@ -32,7 +32,7 @@ public class EWCFG extends JSONFile {
     }
     public void reloadBorder(SpyableAttribute<?> attri){
         if(ServerHelper.server != null) {
-            EWEventHandler.growBorder();
+            BorderManager.growBorder();
         }
     }
 
