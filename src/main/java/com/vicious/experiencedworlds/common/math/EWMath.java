@@ -1,4 +1,4 @@
-package com.vicious.experiencedworlds.common;
+package com.vicious.experiencedworlds.common.math;
 
 import com.vicious.experiencedworlds.common.config.EWCFG;
 

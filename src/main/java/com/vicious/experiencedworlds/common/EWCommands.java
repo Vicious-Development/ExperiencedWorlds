@@ -44,6 +44,7 @@ public class EWCommands {
                         .requires((ctx)->ctx.hasPermission(Commands.LEVEL_ADMINS) || inIntegratedServer(ctx))
                         .then(Commands.literal("reload")
                                 .executes(ctx->{
+                                    EWChatMessage.from("<experiencedworlds.reloadedconfig>");
                                     EWCFG.getInstance().load();
                                     EWCFG.getInstance().save();
                                     return 1;

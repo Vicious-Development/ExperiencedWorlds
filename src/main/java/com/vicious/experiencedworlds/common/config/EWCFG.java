@@ -69,9 +69,8 @@ public class EWCFG extends JSONFile {
     @Save(description = "The amount of time in milliseconds the border takes to grow 0.5 blocks on every edge (aka increase width by 1 block)", parent = "GameplayBalanced")
     public PersistentAttribute<Long> borderGrowthSpeed = new PersistentAttribute<>("BorderGrowthSpeed",Long.class,1000L);
 
-    @Save(description = "The max world border size")
+    @Save(description = "The max world border size", parent = "GameplayBalanced")
     public SpyableAttribute<Integer> maximumBorderSize = new SpyableAttribute<>("MaxBorderSize",Integer.class, Integer.MAX_VALUE);
-
 
     @Save(description = "When one of these stats reaches a power of ten (including 1) the border will grow. These are the only supported options: [minecraft:{mined, crafted, used, broken, picked_up, dropped, killed, killed_by}]. There might be other stats that work but I wouldn't recommend trying them as it is untested.", parent = "GameplayBalanced")
     public SpyableAttribute<JSONMap> activeStats = new SpyableAttribute<>("ActiveStatistics",JSONMap.class,new JSONMap());

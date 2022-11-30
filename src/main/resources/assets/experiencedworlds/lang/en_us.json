@@ -12,5 +12,6 @@
   "experiencedworlds.setworldsize": "Set the world specific size to %1$s",
   "experiencedworlds.worldmultiplier": "1%$s's world border multiplier is %2$s",
   "experiencedworlds.worldsize": "1%$s's world border size is %2$s",
-  "experiencedworlds.searchingforsafety": "Currently searching for a fair starting point. You may be teleported soon."
+  "experiencedworlds.searchingforsafety": "Currently searching for a fair starting point. You may be teleported soon.",
+  "experiencedworlds.reloadedconfig": "Reloaded Config!"
 }
