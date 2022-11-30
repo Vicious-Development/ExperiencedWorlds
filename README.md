@@ -1,6 +1,5 @@
 # ExperiencedWorlds
- The world grows as your experience of it does.
-
+This is a mod version of the classic "one chunk survival" experience except with the ability to expand the border slowly over time.
 
 Here's a list of seeds I found interesting in that the beginning is possible, but challenging or just a seed with a cool spawn.
 
