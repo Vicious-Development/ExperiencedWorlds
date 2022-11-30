@@ -7,6 +7,7 @@ import com.vicious.experiencedworlds.common.data.EWWorldData;
 import com.vicious.experiencedworlds.common.data.IExperiencedWorlds;
 import com.vicious.experiencedworlds.common.data.IWorldSpecificEWDat;
 import com.vicious.experiencedworlds.common.data.SyncableWorldBorder;
+import com.vicious.experiencedworlds.common.math.EWMath;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.serverstatistics.common.event.AdvancedFirstTimeEvent;
 import com.vicious.serverstatistics.common.event.ServerStatsResetEvent;
@@ -47,7 +48,7 @@ public class EWEventHandler {
             StatsCounter counter = ServerStatistics.getData().counter.getValue();
             int current = counter.getValue(stat);
             if (current > 0) {
-                int borderChange = EWCFG.getInstance().logarithmicStatRequirement.get() ? (int)EWMath.logConfigBase(current + sce.getChange()) - (int)EWMath.logConfigBase(current) : current+sce.getChange() - current;
+                int borderChange = EWCFG.getInstance().logarithmicStatRequirement.get() ? (int) EWMath.logConfigBase(current + sce.getChange()) - (int)EWMath.logConfigBase(current) : current+sce.getChange() - current;
                 if (borderChange != 0) {
                     increaseBorder(borderChange, sce);
                 }
@@ -160,10 +161,10 @@ public class EWEventHandler {
         double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
         int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
         if(a2 != 1) {
-            if(EWCFG.getInstance().sendBorderGrowthAnnouncements()) EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
+            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()) EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
         }
         else{
-            if(EWCFG.getInstance().sendBorderGrowthAnnouncements()) EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
+            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()) EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
         }
         growBorder(swb);
     }

@@ -1,7 +1,7 @@
 package com.vicious.experiencedworlds.common.data;
 
 import com.vicious.experiencedworlds.common.config.EWCFG;
-import com.vicious.experiencedworlds.common.EWMath;
+import com.vicious.experiencedworlds.common.math.EWMath;
 import com.vicious.serverstatistics.ServerStatistics;
 import com.vicious.viciouscore.aunotamation.isyncablecompoundholder.annotation.Obscured;
 import com.vicious.viciouscore.common.data.DataAccessor;
@@ -14,7 +14,6 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     public SyncablePrimitive<Integer> expansions = new SyncablePrimitive<>("expansions",0);
     @Obscured
     public SyncablePrimitive<Integer> fairnesslevel = new SyncablePrimitive<>("fairnesslevel",-1);
-
 
     public SyncableWorldBorder(String key) {
         super(key);
@@ -29,6 +28,8 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     public void expand(int expansions) {
         this.expansions.setValue(expansions+this.expansions.getValue());
     }
+
+
 
     @Override
     public double getTransformedBorderSize() {
@@ -73,5 +74,9 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
 
     public void reset() {
         expansions.setValue(0);
+    }
+
+    public boolean maximumBorderSize() {
+        return getTransformedBorderSize() > EWCFG.getInstance().maximumBorderSize.get();
     }
 }
