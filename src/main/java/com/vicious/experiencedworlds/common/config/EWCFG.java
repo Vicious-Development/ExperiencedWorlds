@@ -26,9 +26,11 @@ public class EWCFG extends JSONFile {
         activeStats.get().put("minecraft:killed",true);
         Aunotamation.processObject(this);
         advancementMultiplierBase.listen(this::reloadBorder);
+        advancementMultiplierMax.listen(this::reloadBorder);
         multipliersExponentialGain.listen(this::reloadBorder);
         sizeGained.listen(this::reloadBorder);
         startingSize.listen(this::reloadBorder);
+        maximumBorderSize.listen(this::reloadBorder);
     }
     public void reloadBorder(SpyableAttribute<?> attri){
         if(ServerHelper.server != null) {

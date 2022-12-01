@@ -159,6 +159,7 @@ publishing {
                 password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
             }
         }
+
     }
     publications {
         gpr(MavenPublication) {
@@ -172,4 +173,4 @@ publishing {
 
 /*
 PUBLISHING END
- */
+*/

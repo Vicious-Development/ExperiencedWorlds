@@ -77,6 +77,6 @@ public class SyncableWorldBorder extends SyncableCompound implements IWorldBorde
     }
 
     public boolean maximumBorderSize() {
-        return getTransformedBorderSize() > EWCFG.getInstance().maximumBorderSize.get();
+        return getTransformedBorderSize() >= EWCFG.getInstance().maximumBorderSize.get();
     }
 }
