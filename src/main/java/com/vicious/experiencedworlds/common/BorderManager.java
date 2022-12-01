@@ -38,7 +38,7 @@ public class BorderManager {
                     border.lerpSizeBetween(size, newSize,  change * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
                 }
                 else{
-                    border.lerpSizeBetween(newSize, size, change * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
+                    border.lerpSizeBetween(size, newSize, change * (!doFastExpand ? EWCFG.getInstance().borderGrowthSpeed.get() : 1L) + border.getLerpRemainingTime());
                 }
             }
         }
@@ -74,10 +74,14 @@ public class BorderManager {
         double a2 = Math.round(amount*swb.getSizeMultiplier()*EWCFG.getInstance().sizeGained.value()*100.0)/100.0;
         int current = ServerStatistics.getData().counter.getValue().getValue(sce.getStat());
         if(a2 != 1) {
-            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()) EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
+            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()){
+                EWChatMessage.from("<3experiencedworlds.grewborderplural>", sce.getPlayer().getDisplayName(), current+1,a2).send(ServerHelper.getPlayers());
+            }
         }
         else{
-            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()) EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
+            if(EWCFG.getInstance().sendBorderGrowthAnnouncements() && !swb.maximumBorderSize()){
+                EWChatMessage.from("<2experiencedworlds.grewborder>", sce.getPlayer().getDisplayName(), current+1).send(ServerHelper.getPlayers());
+            }
         }
         growBorder(swb);
     }
